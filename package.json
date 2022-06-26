@@ -24,6 +24,9 @@
     "start": "tsc --project ./src/tsconfig.json --watch"
   },
   "author": "",
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "dependencies": { },
   "devDependencies": {
