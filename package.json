@@ -17,7 +17,7 @@
     "lint": "eslint -c .eslintrc.json ./src --ext .ts,.tsx",
     "lint-errors-only": "eslint -c .eslintrc.json ./src --ext .ts,.tsx --quiet",
    
-    "build-ts": "tsc --project ./src/tsconfig.json",
+    "build-ts": "tsc --project ./src/tsconfig.dist.json",
 
     "check": "npm rum lint-errors-only && npm run build-ts && npm run unit-tests",
 
