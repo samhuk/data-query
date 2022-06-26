@@ -1,27 +1,44 @@
-# package-starter
+# js-data-query
 
-A starter for creating a generic component/"package" in typescript.
-
-## Setup
-
-Throughout the starter, the component is called `MyComponent` as a placeholder. Execute `setup.sh` (e.g. `sh setup.sh`) to replace all occurences of `MyComponent` (and `my-component` in some places) with your desired component name.
+A Javascript Data Query package that aids with creating data queries for Javascript, and
+provides transformed versions of the data query in URL query parameters and PostgreSQL statement form.
 
 ## Usage
 
-`npm i`
+Basic usage:
 
-To start hot reloading: `npm start`
+```typescript
+import { createDataQuery } from '@samhuk/data-query'
+import { Sorting } from '@samhuk/data-query/types'
 
-Edit a file within `src` to observe hot-reloading.
+const dataQuery = createDataQuery({
+  page: 5,
+  pageSize: 10,
+  fieldSortingList: [
+    { fieldName: 'dateCreated', sorting: Sorting.DESC }
+  ]
+})
 
-## NPM Publishing
+// -- Reading transformed data (i.e. URL, PostgreSQL)
+const urlQueryParameters = dataQuery.urlQueryParameters
+// { page: '5', pageSize: '10', orderBy: 'dateCreated-desc' }
+const postgreSqlOrderByLimitOffsetSql = dataQuery.pSqlSql.orderByLimitOffset
+// "orderBy dateCreated desc limit 10 offset 40"
 
-1. Ensure that `package.json` has the correct details for the npm package (including a version bump)
-2. `npm run check`
-3. `npm run build-ts`
-4. `npm publish`
+// -- Modify the data query
+dataQuery.updatePage(10)
+dataQuery.updatePageSize(5)
+dataQuery.updateFieldSortingList([])
+```
 
-## Notable Technologies
+Creating a data query from url query parameters:
 
-* typescript
-* jest
+```typescript
+import { createFromUrlQueryParameters } from '@samhuk/data-query'
+
+const dataQuery = createFromUrlQueryParameters({
+  page: '5',
+  pageSize: '10',
+  orderBy: 'field1-asc,field2-desc',
+})
+```

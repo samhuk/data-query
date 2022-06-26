@@ -1,7 +1,7 @@
 {
-  "name": "my-component",
+  "name": "@samhuk/data-query",
   "version": "1.0.0",
-  "description": "my-component description",
+  "description": "JS data query functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
