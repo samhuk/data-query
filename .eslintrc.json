@@ -10,7 +10,7 @@
     "node_modules/**/*",
     "build/**/*",
     "build-test/**/*",
-    "dist**/*",
+    "dist/**/*",
     "package.lock.json",
     "LICENSE",
     "*.yaml",
@@ -40,7 +40,7 @@
   "settings": {
     "import/resolver": {
       "node": {
-        "extensions": [".ts", ".tsx", ".js", ".jsx", ".scss"]
+        "extensions": [".ts", ".tsx", ".js"]
       }
     }
   },
