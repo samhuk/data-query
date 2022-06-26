@@ -1,6 +1,6 @@
 # js-data-query
 
-A Javascript Data Query package that creates data queries in Javascript,
+A Javascript data query package that creates data queries in Javascript,
 providing transformed versions of the query in URL query parameter and PostgreSQL statement form.
 
 ## Usage
