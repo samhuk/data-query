@@ -1,6 +1,6 @@
 {
   "name": "@samhuk/data-query",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "JS data query functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,6 +27,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "repository": "https://github.com/samhuk/js-data-query",
   "license": "MIT",
   "dependencies": { },
   "devDependencies": {
