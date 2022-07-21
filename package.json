@@ -27,7 +27,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://github.com/samhuk/js-data-query",
+  "repository": "https://github.com/samhuk/data-query",
   "license": "MIT",
   "dependencies": { },
   "devDependencies": {

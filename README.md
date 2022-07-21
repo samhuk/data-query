@@ -1,7 +1,6 @@
-# js-data-query
+# data-query
 
-A Javascript data query package that creates data queries in Javascript,
-providing transformed versions of the query in URL query parameter and PostgreSQL statement form.
+A package for creating a data query, with support to convert to URL parameters and a PostgreSQL statement.
 
 ## Usage
 
@@ -19,7 +18,7 @@ const dataQuery = createDataQuery({
   ]
 })
 
-// -- Reading transformed data (i.e. URL, PostgreSQL)
+// -- Reading converted forms (i.e. URL, PostgreSQL)
 const urlQueryParameters = dataQuery.urlQueryParameters
 // { page: '5', pageSize: '10', orderBy: 'dateCreated-desc' }
 const postgreSqlOrderByLimitOffsetSql = dataQuery.pSqlSql.orderByLimitOffset
