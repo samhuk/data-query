@@ -1,60 +1,79 @@
-export enum Sorting {
-  NONE = 'none',
-  ASC = 'asc',
-  DESC = 'desc'
-}
+import { DataFilterNodeOrGroup } from '@samhuk/data-filter/dist/types'
+import { PagingRecord } from './paging/types'
+import { SortingRecord } from './sorting/types'
 
-export type FieldSorting = {
-  fieldName: string
-  sorting: Sorting
+export type DataQueryRecord = PagingRecord & {
+  sorting?: SortingRecord
+  filter?: DataFilterNodeOrGroup
 }
 
 export type DataQueryOptions = DataQueryRecord
 
-export type DataQueryPSql = DataQueryPSqlSql & {
-  updateRecord: (newRecord: DataQueryRecord) => void
-  updatePage: (newPage: number) => void
-  updatePageSize: (newPageSize: number) => void
-  updateFieldSortingList: (newFieldSortingList: FieldSorting[]) => void
-}
-
-export type Paging = {
-  page: number
-  pageSize: number
-}
-
-export type DataQueryRecord = Paging & {
-  fieldSortingList: FieldSorting[]
-}
-
-export type DataQueryPSqlSql = {
+export type DataQuerySql = {
   /**
-   * The ORDER BY, LIMIT, and OFFSET psql
+   * The ORDER BY, LIMIT, and OFFSET SQL statement
    */
   orderByLimitOffset: string
+  /**
+   * The WHERE SQL clause
+   */
+  where: string
 }
 
-export type DataQueryUrlQueryParameters = {
+export type DataQueryUrlParameters = {
   page: string
   pageSize: string
-  orderBy: string
+  sort: string
+  filter: string
 }
 
-export type DataQueryUrl = {
-  queryParameters: DataQueryUrlQueryParameters
-  queryParametersString: string
-  updateRecord: (newRecord: DataQueryRecord) => void
-  updatePage: (newPage: number) => void
-  updatePageSize: (newPageSize: number) => void
-  updateFieldSortingList: (newFieldSortingList: FieldSorting[]) => void
+export type ToSqlOptions = {
+  /**
+   * Determines whether "WHERE" will be included in the SQL statement.
+   *
+   * This is useful if the where statement needs to be combined with
+   * other, external, custom, where statements.
+   *
+   * @default true
+   */
+  includeWhereWord?: boolean
 }
 
-export type DataQuery = DataQueryRecord & {
-  updateRecord: (newRecord: DataQueryRecord) => void
+export type DataQuery = {
+  page: number | null
+  pageSize: number | null
+  sorting: SortingRecord | null
+  filter: DataFilterNodeOrGroup | null
+  /**
+   * Updates the data query value.
+   */
+  update: (newValue: DataQueryRecord) => void
+  /**
+   * Updates the page of the data query.
+   */
   updatePage: (newPage: number) => void
+  /**
+   * Updates the page size of the data query.
+   */
   updatePageSize: (newPageSize: number) => void
-  updateFieldSortingList: (newFieldSortingList: FieldSorting[]) => void
-  pSqlSql: DataQueryPSqlSql
-  urlQueryParameters: DataQueryUrlQueryParameters
-  urlQueryParametersString: string
+  /**
+   * Updates the sorting of the data query.
+   */
+  updateSorting: (newSorting: SortingRecord) => void
+  /**
+   * Updates the data filter of the data query.
+   */
+  updateFilter: (newFilter: DataFilterNodeOrGroup) => void
+  /**
+   * Converts the current value of the data query to SQL statements.
+   */
+  toSql: (options?: ToSqlOptions) => DataQuerySql
+  /**
+   * Converts the current value of the data query to URL query parameters.
+   */
+  toUrlParams: () => DataQueryUrlParameters
+  /**
+   * Converts the current value of the data query to a URL query parameters string.
+   */
+  toUrlParamsString: () => string
 }

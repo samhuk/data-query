@@ -1,5 +1,7 @@
-import { createDataQuery, createFromUrlQueryParameters } from '.'
-import { Sorting } from './types'
+import { Operator } from '@samhuk/data-filter/dist/types'
+import { createDataQuery } from '.'
+import { SortingDirection } from './sorting/types'
+import { DataQuerySql, DataQueryUrlParameters } from './types'
 
 describe('createDataQuery', () => {
   const fn = createDataQuery
@@ -8,152 +10,97 @@ describe('createDataQuery', () => {
     const instance = fn({
       page: 1,
       pageSize: 1,
-      fieldSortingList: [
-        { fieldName: 'field1', sorting: Sorting.ASC },
-        { fieldName: 'field2', sorting: Sorting.DESC },
-        { fieldName: 'field3', sorting: Sorting.NONE },
+      sorting: [
+        { field: 'field1', sorting: SortingDirection.ASC },
+        { field: 'field2', sorting: SortingDirection.DESC },
       ],
     })
 
     expect(instance.page).toBe(1)
     expect(instance.pageSize).toBe(1)
-    expect(instance.fieldSortingList).toEqual([
-      { fieldName: 'field1', sorting: Sorting.ASC },
-      { fieldName: 'field2', sorting: Sorting.DESC },
-      { fieldName: 'field3', sorting: Sorting.NONE },
+    expect(instance.sorting).toEqual([
+      { field: 'field1', sorting: SortingDirection.ASC },
+      { field: 'field2', sorting: SortingDirection.DESC },
     ])
-    expect(instance.pSqlSql.orderByLimitOffset).toBe('order by field1 asc,field2 desc limit 1 offset 0')
-    expect(instance.urlQueryParameters.orderBy).toBe('field1-asc,field2-desc')
-    expect(instance.urlQueryParameters.page).toBe('1')
-    expect(instance.urlQueryParameters.pageSize).toBe('1')
+    expect(instance.filter).toBe(undefined)
   })
 
-  test('updatePage', () => {
+  test('toSql', () => {
+    // -- Arrange
     const instance = fn({
       page: 1,
       pageSize: 1,
-      fieldSortingList: [
-        { fieldName: 'field1', sorting: Sorting.ASC },
-        { fieldName: 'field2', sorting: Sorting.DESC },
-        { fieldName: 'field3', sorting: Sorting.NONE },
+      sorting: [
+        { field: 'field1', sorting: SortingDirection.ASC },
+        { field: 'field2', sorting: SortingDirection.DESC },
       ],
+      filter: {
+        field: 'foo',
+        op: Operator.EQUALS,
+        val: 1,
+      },
     })
 
-    instance.updatePage(2)
+    // -- Act
+    const sql = instance.toSql()
 
-    expect(instance.page).toBe(2)
-    expect(instance.pageSize).toBe(1)
-    expect(instance.fieldSortingList).toEqual([
-      { fieldName: 'field1', sorting: Sorting.ASC },
-      { fieldName: 'field2', sorting: Sorting.DESC },
-      { fieldName: 'field3', sorting: Sorting.NONE },
-    ])
-    expect(instance.pSqlSql.orderByLimitOffset).toBe('order by field1 asc,field2 desc limit 1 offset 1')
-    expect(instance.urlQueryParameters.orderBy).toBe('field1-asc,field2-desc')
-    expect(instance.urlQueryParameters.page).toBe('2')
-    expect(instance.urlQueryParameters.pageSize).toBe('1')
+    // -- Assert
+    const expected: DataQuerySql = {
+      orderByLimitOffset: 'order by "field1" asc, "field2" desc limit 1 offset 0',
+      where: 'where foo = 1',
+    }
+    expect(sql).toEqual(expected)
   })
 
-  test('updatePageSize', () => {
+  test('toUrlParams', () => {
+    // -- Arrange
     const instance = fn({
       page: 1,
       pageSize: 1,
-      fieldSortingList: [
-        { fieldName: 'field1', sorting: Sorting.ASC },
-        { fieldName: 'field2', sorting: Sorting.DESC },
-        { fieldName: 'field3', sorting: Sorting.NONE },
+      sorting: [
+        { field: 'field1', sorting: SortingDirection.ASC },
+        { field: 'field2', sorting: SortingDirection.DESC },
       ],
+      filter: {
+        field: 'foo',
+        op: Operator.EQUALS,
+        val: 1,
+      },
     })
 
-    instance.updatePageSize(2)
+    // -- Act
+    const urlParams = instance.toUrlParams()
 
-    expect(instance.page).toBe(1)
-    expect(instance.pageSize).toBe(2)
-    expect(instance.fieldSortingList).toEqual([
-      { fieldName: 'field1', sorting: Sorting.ASC },
-      { fieldName: 'field2', sorting: Sorting.DESC },
-      { fieldName: 'field3', sorting: Sorting.NONE },
-    ])
-    expect(instance.pSqlSql.orderByLimitOffset).toBe('order by field1 asc,field2 desc limit 2 offset 0')
-    expect(instance.urlQueryParameters.orderBy).toBe('field1-asc,field2-desc')
-    expect(instance.urlQueryParameters.page).toBe('1')
-    expect(instance.urlQueryParameters.pageSize).toBe('2')
+    // -- Assert
+    const expected: DataQueryUrlParameters = {
+      page: '1',
+      pageSize: '1',
+      sort: 'field1-asc,field2-desc',
+      filter: undefined,
+    }
+    expect(urlParams).toEqual(expected)
   })
 
-  test('updateFieldSortingList', () => {
+  test('toUrlParamsString', () => {
+    // -- Arrange
     const instance = fn({
       page: 1,
       pageSize: 1,
-      fieldSortingList: [
-        { fieldName: 'field1', sorting: Sorting.ASC },
-        { fieldName: 'field2', sorting: Sorting.DESC },
-        { fieldName: 'field3', sorting: Sorting.NONE },
+      sorting: [
+        { field: 'field1', sorting: SortingDirection.ASC },
+        { field: 'field2', sorting: SortingDirection.DESC },
       ],
+      filter: {
+        field: 'foo',
+        op: Operator.EQUALS,
+        val: 1,
+      },
     })
 
-    instance.updateFieldSortingList([{ fieldName: 'field1', sorting: Sorting.DESC }])
+    // -- Act
+    const urlParamsString = instance.toUrlParamsString()
 
-    expect(instance.page).toBe(1)
-    expect(instance.pageSize).toBe(1)
-    expect(instance.fieldSortingList).toEqual([
-      { fieldName: 'field1', sorting: Sorting.DESC },
-    ])
-    expect(instance.pSqlSql.orderByLimitOffset).toBe('order by field1 desc limit 1 offset 0')
-    expect(instance.urlQueryParameters.orderBy).toBe('field1-desc')
-    expect(instance.urlQueryParameters.page).toBe('1')
-    expect(instance.urlQueryParameters.pageSize).toBe('1')
-  })
-
-  test('updateRecord', () => {
-    const instance = fn({
-      page: 1,
-      pageSize: 1,
-      fieldSortingList: [
-        { fieldName: 'field1', sorting: Sorting.ASC },
-        { fieldName: 'field2', sorting: Sorting.DESC },
-        { fieldName: 'field3', sorting: Sorting.NONE },
-      ],
-    })
-
-    instance.updateRecord({
-      page: 5,
-      pageSize: 10,
-      fieldSortingList: [
-        { fieldName: 'field2', sorting: Sorting.DESC },
-      ],
-    })
-
-    expect(instance.page).toBe(5)
-    expect(instance.pageSize).toBe(10)
-    expect(instance.fieldSortingList).toEqual([
-      { fieldName: 'field2', sorting: Sorting.DESC },
-    ])
-    expect(instance.pSqlSql.orderByLimitOffset).toBe('order by field2 desc limit 10 offset 40')
-    expect(instance.urlQueryParameters.orderBy).toBe('field2-desc')
-    expect(instance.urlQueryParameters.page).toBe('5')
-    expect(instance.urlQueryParameters.pageSize).toBe('10')
-  })
-})
-
-describe('createFromUrlQueryParameters', () => {
-  const fn = createFromUrlQueryParameters
-
-  test('test', () => {
-    const instance = fn({
-      page: '5',
-      pageSize: '10',
-      orderBy: 'field1-asc,field2-desc',
-    })
-
-    expect(instance.page).toBe(5)
-    expect(instance.pageSize).toBe(10)
-    expect(instance.fieldSortingList).toEqual([
-      { fieldName: 'field1', sorting: Sorting.ASC },
-      { fieldName: 'field2', sorting: Sorting.DESC },
-    ])
-    expect(instance.pSqlSql.orderByLimitOffset).toBe('order by field1 asc,field2 desc limit 10 offset 40')
-    expect(instance.urlQueryParameters.orderBy).toBe('field1-asc,field2-desc')
-    expect(instance.urlQueryParameters.page).toBe('5')
-    expect(instance.urlQueryParameters.pageSize).toBe('10')
+    // -- Assert
+    expect(urlParamsString).toEqual('page=1&pageSize=1&sort=field1-asc,field2-desc')
   })
 })

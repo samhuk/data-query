@@ -1,57 +1,69 @@
-/* This is the entrypoint ts file for the component.
- */
+import { createDataFilter } from '@samhuk/data-filter'
+import { DataFilter } from '@samhuk/data-filter/dist/types'
+import { createSorting } from './sorting'
+import { createPaging } from './paging'
+import { DataQuery, DataQueryOptions, DataQuerySql, DataQueryUrlParameters, ToSqlOptions } from './types'
+import { Sorting } from './sorting/types'
+import { Paging } from './paging/types'
 
-import { createDataQueryPSql } from './psql'
-import { DataQuery, DataQueryOptions, DataQueryPSql, DataQueryUrl } from './types'
-import { convertUrlQueryParametersToRecord, createDataQueryUrl } from './url'
+const toSql = (sorting: Sorting, paging: Paging, dataFilter: DataFilter, options?: ToSqlOptions): DataQuerySql => ({
+  orderByLimitOffset: [
+    sorting.toSql(),
+    paging.toSql(),
+  ].join(' '),
+  where: ((options?.includeWhereWord ?? true) ? 'where ' : '').concat(dataFilter.toSql()),
+})
 
-export const createDataQuery = (options: DataQueryOptions): DataQuery => {
-  let instance: DataQuery
-  const dataQueryPSql: DataQueryPSql = createDataQueryPSql(options)
-  const dataQueryUrl: DataQueryUrl = createDataQueryUrl(options)
+const toUrlParams = (sorting: Sorting, paging: Paging, dataFilter: DataFilter): DataQueryUrlParameters => ({
+  ...paging.toUrlParams(),
+  ...sorting.toUrlParams(),
+  filter: undefined, // TODO
+})
 
-  return instance = {
-    fieldSortingList: options.fieldSortingList,
-    page: options.page,
-    pageSize: options.pageSize,
-    updateRecord: newRecord => {
-      instance.fieldSortingList = newRecord.fieldSortingList
-      instance.page = newRecord.page
-      instance.pageSize = newRecord.pageSize
-      dataQueryPSql.updateRecord(instance)
-      dataQueryUrl.updateRecord(instance)
-      instance.pSqlSql.orderByLimitOffset = dataQueryPSql.orderByLimitOffset
-      instance.urlQueryParameters = dataQueryUrl.queryParameters
-      instance.urlQueryParametersString = dataQueryUrl.queryParametersString
-    },
-    updateFieldSortingList: newFieldSortingList => {
-      instance.fieldSortingList = newFieldSortingList
-      dataQueryPSql.updateFieldSortingList(instance.fieldSortingList)
-      dataQueryUrl.updateFieldSortingList(instance.fieldSortingList)
-      instance.pSqlSql.orderByLimitOffset = dataQueryPSql.orderByLimitOffset
-    },
-    updatePage: newPage => {
-      instance.page = newPage
-      dataQueryPSql.updatePage(instance.page)
-      dataQueryUrl.updatePage(instance.page)
-      instance.pSqlSql.orderByLimitOffset = dataQueryPSql.orderByLimitOffset
-    },
-    updatePageSize: newPageSize => {
-      instance.pageSize = newPageSize
-      dataQueryPSql.updatePageSize(instance.pageSize)
-      dataQueryUrl.updatePageSize(instance.pageSize)
-      instance.pSqlSql.orderByLimitOffset = dataQueryPSql.orderByLimitOffset
-    },
-    pSqlSql: {
-      orderByLimitOffset: dataQueryPSql.orderByLimitOffset,
-    },
-    urlQueryParameters: dataQueryUrl.queryParameters,
-    urlQueryParametersString: dataQueryUrl.queryParametersString,
-  }
+const toUrlParamsString = (sorting: Sorting, paging: Paging, dataFilter: DataFilter): string => {
+  const params = toUrlParams(sorting, paging, dataFilter)
+
+  return Object.entries(params)
+    .filter(([k, v]) => v != null)
+    .map(([k, v]) => `${k}=${v}`)
+    .join('&')
 }
 
-export const createFromUrlQueryParameters = (urlQueryParameters: { [x: string]: string }): DataQuery => {
-  const record = convertUrlQueryParametersToRecord(urlQueryParameters)
-  const options = record
-  return createDataQuery(options)
+export const createDataQuery = (options: DataQueryOptions): DataQuery => {
+  let dataQuery: DataQuery
+  const sorting = createSorting(options.sorting)
+  const paging = createPaging(options)
+  const dataFilter = createDataFilter(options.filter)
+
+  return dataQuery = {
+    sorting: options.sorting,
+    page: options.page,
+    pageSize: options.pageSize,
+    filter: options.filter,
+    toSql: _options => toSql(sorting, paging, dataFilter, _options),
+    toUrlParams: () => toUrlParams(sorting, paging, dataFilter),
+    toUrlParamsString: () => toUrlParamsString(sorting, paging, dataFilter),
+    update: newValue => {
+      dataQuery.updateSorting(newValue.sorting)
+      dataQuery.updatePage(newValue.page)
+      dataQuery.updatePageSize(newValue.pageSize)
+      dataQuery.updateFilter(newValue.filter)
+    },
+    updateSorting: newSorting => {
+      sorting.update(newSorting)
+      dataQuery.sorting = sorting.value
+    },
+    updateFilter: newFilterNodeOrGroup => {
+      dataFilter.updateFilter(newFilterNodeOrGroup)
+      dataQuery.filter = dataFilter.value
+    },
+    updatePage: newPage => {
+      paging.updatePage(newPage)
+      dataQuery.page = paging.page
+    },
+    updatePageSize: newPageSize => {
+      paging.updatePageSize(newPageSize)
+      dataQuery.pageSize = paging.pageSize
+    },
+  }
 }
