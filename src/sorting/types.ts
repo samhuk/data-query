@@ -2,7 +2,7 @@ export enum SortingDirection {
   ASC = 'asc',
   DESC = 'desc',
 }
-export type SortingRecord = { field: string, sorting: SortingDirection }[] | null
+export type SortingRecord = { field: string, dir: SortingDirection }[] | null
 
 export type SortingUrlParameters = {
   sort: string

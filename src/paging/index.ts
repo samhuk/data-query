@@ -18,15 +18,20 @@ const toUrlParams = (paging: PagingRecord): PagingUrlParameters => ({
   pageSize: paging.pageSize?.toString(),
 })
 
-export const createPaging = (options: PagingRecord): Paging => {
+export const createPaging = (options?: PagingRecord): Paging => {
   let paging: Paging
 
   return paging = {
-    page: options.page,
-    pageSize: options.pageSize,
+    page: options?.page,
+    pageSize: options?.pageSize,
     updatePage: newPage => paging.page = newPage,
     updatePageSize: newPageSize => paging.pageSize = newPageSize,
     toSql: () => toSql(paging),
     toUrlParams: () => toUrlParams(paging),
   }
 }
+
+export const createPagingRecordFromUrlParams = (pagingUrlParams: PagingUrlParameters): PagingRecord => ({
+  page: pagingUrlParams.page != null && pagingUrlParams.page.length > 0 ? parseInt(pagingUrlParams.page) : null,
+  pageSize: pagingUrlParams.pageSize != null && pagingUrlParams.pageSize.length > 0 ? parseInt(pagingUrlParams.pageSize) : null,
+})

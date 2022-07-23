@@ -1,34 +1,21 @@
-import { Sorting, SortingRecord, SortingUrlParameters } from './types'
+import { Sorting, SortingDirection, SortingRecord, SortingUrlParameters } from './types'
 
 const toSql = (record: SortingRecord): string => (
   (record != null && record.length > 0)
     ? `order by ${record
-      .filter(fs => fs.sorting != null)
-      .map(fs => `"${fs.field}" ${fs.sorting}`)
+      .filter(fs => fs.dir != null)
+      .map(fs => `"${fs.field}" ${fs.dir}`)
       .join(', ')}`
     : ''
 )
 
 const toUrlParams = (sorting: SortingRecord): SortingUrlParameters => ({
   sort: sorting
-    .filter(fs => fs.sorting != null)
-    .map(fs => `${fs.field}-${fs.sorting}`).join(','),
+    .filter(fs => fs.dir != null)
+    .map(fs => `${fs.field}-${fs.dir}`).join(','),
 })
 
-// TODO: Write fromUrlParameters logic
-// const deserializeFieldSortingList = (fieldSortingListString: string): Sorting[] => {
-//   const regex = /([a-zA-Z0-9]*)-(asc|desc),?/g
-//   const fieldSorting: FieldSorting[] = []
-
-//   let result = null
-//   // eslint-disable-next-line no-cond-assign
-//   while ((result = regex.exec(fieldSortingListString)) != null)
-//     fieldSorting.push({ field: result[1], sorting: result[2] as SortingDirection })
-
-//   return fieldSorting
-// }
-
-export const createSorting = (options: SortingRecord): Sorting => {
+export const createSorting = (options?: SortingRecord): Sorting => {
   let sorting: Sorting
 
   return sorting = {
@@ -37,4 +24,16 @@ export const createSorting = (options: SortingRecord): Sorting => {
     toSql: () => toSql(sorting.value),
     toUrlParams: () => toUrlParams(sorting.value),
   }
+}
+
+export const createSortingRecordFromUrlParam = (sortingUrlParamValue: string): SortingRecord => {
+  const regex = /([a-zA-Z0-9]*)-(asc|desc),?/g
+  const sortingRecord: SortingRecord = []
+
+  let result = null
+  // eslint-disable-next-line no-cond-assign
+  while ((result = regex.exec(sortingUrlParamValue)) != null)
+    sortingRecord.push({ field: result[1], dir: result[2] as SortingDirection })
+
+  return sortingRecord
 }

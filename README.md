@@ -1,68 +1,37 @@
-# data-filter
+# data-query
 
-A package for creating data filters, with conversion to an SQL WHERE clause.
+A package for creating data queries with paging, sorting, and filtering, with URL and SQL conversion.
 
 ## Usage
 
-`npm i @samhuk/data-filter`
+`npm i @samhuk/data-query`
 
-Simple, single-node filter
 ```typescript
-import { createDataFilter } from '@samhuk/data-filter'
+import { createDataQuery } from '@samhuk/data-query'
 import { Operator, DataFilterLogic } from '@samhuk/data-filter/types'
 
-const df1 = createDataFilter({
-  field: 'username',
-  op: Operator.EQUALS,
-  val: 'bob',
+const dq = createDataQuery({
+  page: 5,
+  pageSize: 10,
+  sorting: [{ field: 'user_id', dir: 'asc' }],
+  filter: {
+    field: 'date_deleted',
+    op: '!=',
+    val: null,
+  }
 })
-console.log(df1.toSql()) // (username = 'bob')
+
+// Convert to/from SQL and URL params
+const sql = dq.toSql()
+const urlParams = dq.toUrlParams()
+const urlParamsString = dq.toUrlParamsString()
+const dq1FromUrlParams = createDataQuery().fromUrlParams(urlParams)
+
+// Update parts of the data query
+dq1FromUrlParams.updatePage(6).updatePageSize(11)
 ```
 
-Complex, nested filter:
-
-```typescript
-import { createDataFilter } from '@samhuk/data-filter'
-import { Operator, DataFilterLogic } from '@samhuk/data-filter/types'
-
-const df2 = createDataFilter({
-  logic: DataFilterLogic.AND,
-  nodes: [
-    { field: 'id', op: Operator.IN, val: [1, 2, 3] },
-    {
-      logic: DataFilterLogic.OR,
-      nodes: [
-        { field: 'email_v1', op: Operator.NOT_EQUALS, val: null },
-        { field: 'email_v2', op: Operator.NOT_EQUALS, val: null },
-      ],
-    },
-    { field: 'date_deleted', op: Operator.NOT_EQUALS, val: 'null' },
-  ],
-})
-console.log(df2.toSql({ indentation: 2 }))
-```
-
-Merging filters (using `df1` and `df2` from above):
-
-```typescript
-import { joinDataFilters } from '@samhuk/data-filter'
-df1.addAnd({ field: 'bar', op: Operator.NOT_EQUALS, val: 'b' })
-df1.addOr(df2.value)
-const df3 = joinDataFilters(DataFilterLogic.AND, df1, df2)
-```
-
-Use strings instead of Typescript Enums:
-
-```typescript
-import { createDataFilter } from '@samhuk/data-filter'
-
-const df1 = createDataFilter({
-  field: 'username', op: '=', val: 'bob',
-})
-df1.addAnd({ field: 'id', op: 'between', val: [1, 5] })
-```
-
-See the JSDocs for more information on the available operators and other options.
+See the JSDocs for more information on the available options and other capabilities.
 
 ## Development
 

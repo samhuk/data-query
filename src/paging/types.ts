@@ -8,7 +8,9 @@ export type PagingUrlParameters = {
   pageSize: string
 }
 
-export type Paging = PagingRecord & {
+export type Paging = {
+  page: number | null
+  pageSize: number | null
   updatePage: (newPage: number) => void
   updatePageSize: (newPageSize: number) => void
   toSql: () => string
