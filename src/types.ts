@@ -2,12 +2,12 @@ import { DataFilterNodeOrGroup } from '@samhuk/data-filter/dist/types'
 import { PagingRecord } from './paging/types'
 import { SortingRecord } from './sorting/types'
 
-export type DataQueryRecord = PagingRecord & {
-  sorting?: SortingRecord
-  filter?: DataFilterNodeOrGroup
+export type DataQueryRecord<TFieldNames extends string = string> = PagingRecord & {
+  sorting?: SortingRecord<TFieldNames>
+  filter?: DataFilterNodeOrGroup<TFieldNames>
 }
 
-export type DataQueryOptions = DataQueryRecord
+export type DataQueryOptions<TFieldNames extends string = string> = DataQueryRecord<TFieldNames>
 
 export type DataQuerySql = {
   /**
@@ -46,31 +46,33 @@ export type ToSqlOptions = {
   includeWhereWord?: boolean
 }
 
-export type DataQuery = {
+export type DataQuery<TFieldNames extends string = string> = {
   page: number | null
   pageSize: number | null
   sorting: SortingRecord | null
-  filter: DataFilterNodeOrGroup | null
+  filter: DataFilterNodeOrGroup<TFieldNames> | null
   /**
    * Updates the data query value.
    */
-  update: (newValue: DataQueryRecord) => DataQuery
+  update: <TFieldNames2 extends string = string>(newValue: DataQueryRecord<TFieldNames>) => DataQuery<TFieldNames | TFieldNames2>
   /**
    * Updates the page of the data query.
    */
-  updatePage: (newPage: number) => DataQuery
+  updatePage: (newPage: number) => DataQuery<TFieldNames>
   /**
    * Updates the page size of the data query.
    */
-  updatePageSize: (newPageSize: number) => DataQuery
+  updatePageSize: (newPageSize: number) => DataQuery<TFieldNames>
   /**
    * Updates the sorting of the data query.
    */
-  updateSorting: (newSorting: SortingRecord) => DataQuery
+  updateSorting: (newSorting: SortingRecord) => DataQuery<TFieldNames>
   /**
    * Updates the data filter of the data query.
    */
-  updateFilter: (newFilter: DataFilterNodeOrGroup) => DataQuery
+  updateFilter: <TFieldNames2 extends string = string>(
+    newFilter: DataFilterNodeOrGroup<TFieldNames | TFieldNames2>,
+  ) => DataQuery<TFieldNames | TFieldNames2>
   /**
    * Converts the current value of the data query to SQL statements.
    */

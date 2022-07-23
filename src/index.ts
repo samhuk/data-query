@@ -1,5 +1,5 @@
 import { createDataFilter } from '@samhuk/data-filter'
-import { DataFilter } from '@samhuk/data-filter/dist/types'
+import { DataFilter, DataFilterNodeOrGroup } from '@samhuk/data-filter/dist/types'
 import { createSorting, createSortingRecordFromUrlParam } from './sorting'
 import { createPaging, createPagingRecordFromUrlParams } from './paging'
 import { DataQuery, DataQueryOptions, DataQueryRecord, DataQuerySql, DataQueryUrlParameters, ToSqlOptions } from './types'
@@ -34,10 +34,12 @@ const toUrlParamsString = (sorting: Sorting, paging: Paging, dataFilter: DataFil
     .join('&')
 }
 
-const createDataQueryRecordFromUrlParams = (urlParams: DataQueryUrlParameters): DataQueryRecord => {
-  const sortingRecord = createSortingRecordFromUrlParam(urlParams.sort)
+const createDataQueryRecordFromUrlParams = <TFieldNames extends string = string>(
+  urlParams: DataQueryUrlParameters,
+): DataQueryRecord<TFieldNames> => {
+  const sortingRecord = createSortingRecordFromUrlParam<TFieldNames>(urlParams.sort)
   const pagingRecord = createPagingRecordFromUrlParams(urlParams)
-  const dataFilterNodeOrGroup = JSON.parse(decodeURI(urlParams.filter))
+  const dataFilterNodeOrGroup = JSON.parse(decodeURI(urlParams.filter)) as DataFilterNodeOrGroup<TFieldNames>
   return {
     page: pagingRecord.page,
     pageSize: pagingRecord.pageSize,
@@ -46,41 +48,40 @@ const createDataQueryRecordFromUrlParams = (urlParams: DataQueryUrlParameters): 
   }
 }
 
-export const createDataQuery = (options?: DataQueryOptions): DataQuery => {
-  let dataQuery: DataQuery
-  const sorting = createSorting(options?.sorting)
+export const createDataQuery = <TFieldNames extends string = string>(
+  options?: DataQueryOptions<TFieldNames>,
+): DataQuery<TFieldNames> => {
+  let dataQuery: DataQuery<TFieldNames>
+  const sorting = createSorting<TFieldNames>(options?.sorting)
   const paging = createPaging(options)
-  const dataFilter = createDataFilter(options?.filter)
+  const dataFilter = createDataFilter<TFieldNames>(options?.filter)
 
   return dataQuery = {
     sorting: options?.sorting,
     page: options?.page,
     pageSize: options?.pageSize,
     filter: options?.filter,
-    toSql: _options => toSql(sorting, paging, dataFilter, _options),
-    toUrlParams: () => toUrlParams(sorting, paging, dataFilter),
-    toUrlParamsString: () => toUrlParamsString(sorting, paging, dataFilter),
+    toSql: _options => toSql(sorting, paging, dataFilter as any, _options),
+    toUrlParams: () => toUrlParams(sorting, paging, dataFilter as any),
+    toUrlParamsString: () => toUrlParamsString(sorting, paging, dataFilter as any),
     fromUrlParams: (urlParams: DataQueryUrlParameters) => {
       const record = createDataQueryRecordFromUrlParams(urlParams)
-      dataQuery.update(record)
-      return dataQuery
+      return dataQuery.update(record as any)
     },
-    update: newRecord => {
-      dataQuery.updateSorting(newRecord.sorting)
-      dataQuery.updatePage(newRecord.page)
-      dataQuery.updatePageSize(newRecord.pageSize)
-      dataQuery.updateFilter(newRecord.filter)
-      return dataQuery
-    },
+    update: newRecord => dataQuery
+      .updateSorting(newRecord.sorting)
+      .updatePage(newRecord.page)
+      .updatePageSize(newRecord.pageSize)
+      .updateFilter(newRecord.filter) as any,
     updateSorting: newSorting => {
       sorting.update(newSorting)
       dataQuery.sorting = sorting.value
       return dataQuery
     },
     updateFilter: newFilterNodeOrGroup => {
-      dataFilter.updateFilter(newFilterNodeOrGroup)
+      dataFilter.updateFilter(newFilterNodeOrGroup as any)
       dataQuery.filter = dataFilter.value
-      return dataQuery
+      return dataQuery as any
     },
     updatePage: newPage => {
       paging.updatePage(newPage)

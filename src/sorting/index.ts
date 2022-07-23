@@ -15,7 +15,9 @@ const toUrlParams = (sorting: SortingRecord): SortingUrlParameters => ({
     .map(fs => `${fs.field}-${fs.dir}`).join(','),
 })
 
-export const createSorting = (options?: SortingRecord): Sorting => {
+export const createSorting = <TFieldNames extends string = string>(
+  options?: SortingRecord<TFieldNames>,
+): Sorting<TFieldNames> => {
   let sorting: Sorting
 
   return sorting = {
@@ -26,14 +28,16 @@ export const createSorting = (options?: SortingRecord): Sorting => {
   }
 }
 
-export const createSortingRecordFromUrlParam = (sortingUrlParamValue: string): SortingRecord => {
+export const createSortingRecordFromUrlParam = <TFieldNames extends string = string>(
+  sortingUrlParamValue: string,
+): SortingRecord<TFieldNames> => {
   const regex = /([a-zA-Z0-9]*)-(asc|desc),?/g
-  const sortingRecord: SortingRecord = []
+  const sortingRecord: SortingRecord<TFieldNames> = []
 
   let result = null
   // eslint-disable-next-line no-cond-assign
   while ((result = regex.exec(sortingUrlParamValue)) != null)
-    sortingRecord.push({ field: result[1], dir: result[2] as SortingDirection })
+    sortingRecord.push({ field: result[1] as TFieldNames, dir: result[2] as SortingDirection })
 
   return sortingRecord
 }

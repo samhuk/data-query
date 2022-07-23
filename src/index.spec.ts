@@ -1,4 +1,4 @@
-import { Operator } from '@samhuk/data-filter/dist/types'
+import { DataFilterLogic, Operator } from '@samhuk/data-filter/dist/types'
 import { createDataQuery } from '.'
 import { SortingDirection } from './sorting/types'
 import { DataQuerySql, DataQueryUrlParameters } from './types'
@@ -132,6 +132,30 @@ describe('index', () => {
         op: Operator.EQUALS,
         val: 1,
       })
+    })
+
+    test('field name types', () => {
+      // -- Arrange + Act
+      const instance = fn<'id'|'uuid'|'name'|'dateDeleted'>({
+        page: 1,
+        pageSize: 1,
+        sorting: [
+          { field: 'id', dir: SortingDirection.ASC },
+          // @ts-expect-error
+          { field: 'notAField', dir: SortingDirection.DESC },
+        ],
+        filter: {
+          logic: DataFilterLogic.AND,
+          nodes: [
+            { field: 'id', op: Operator.EQUALS, val: 5 },
+            // @ts-expect-error
+            { field: 'notAField', op: Operator.EQUALS, val: 5 },
+          ],
+        },
+      })
+
+      // Dummy assertion
+      expect(instance).toBeDefined()
     })
   })
 })
