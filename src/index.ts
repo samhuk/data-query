@@ -15,7 +15,7 @@ const toSql = (sorting: Sorting, paging: Paging, dataFilter: DataFilter, options
   return {
     orderByLimitOffset,
     where,
-    orderByLimitOffsetWhere: `${orderByLimitOffset} ${where}`,
+    whereOrderByLimitOffset: `${where} ${orderByLimitOffset}`,
   }
 }
 

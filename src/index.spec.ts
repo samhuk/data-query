@@ -51,7 +51,7 @@ describe('index', () => {
       const expected: DataQuerySql = {
         orderByLimitOffset: 'order by "field1" asc, "field2" desc limit 1 offset 0',
         where: 'where foo = 1',
-        orderByLimitOffsetWhere: 'order by "field1" asc, "field2" desc limit 1 offset 0 where foo = 1',
+        whereOrderByLimitOffset: 'where foo = 1 order by "field1" asc, "field2" desc limit 1 offset 0',
       }
       expect(sql).toEqual(expected)
     })

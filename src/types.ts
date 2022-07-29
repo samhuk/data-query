@@ -15,16 +15,17 @@ export type DataQuerySql = {
    */
   orderByLimitOffset: string
   /**
-   * The WHERE SQL clause
+   * The WHERE SQL statement
    */
   where: string
   /**
-   * `orderByLimitOffset` and `where` concatenated together.
+   * The WHERE, ORDER BY, LIMIT, and OFFSET SQL statement.
    *
    * This is useful if the SQL query does not require any statements between
-   * the order by, limit, or offset, and the where (i.e. group by, etc.).
+   * the where statement and the order by, limit, or offset statements
+   * (E.g. group by, having, window, etc.).
    */
-  orderByLimitOffsetWhere: string
+  whereOrderByLimitOffset: string
 }
 
 export type DataQueryUrlParameters = {
