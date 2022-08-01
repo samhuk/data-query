@@ -1,6 +1,6 @@
-import { DataFilterNodeOrGroup } from '@samhuk/data-filter/dist/types'
+import { DataFilterNode, DataFilterNodeOrGroup, NodeTransformResult } from '@samhuk/data-filter/dist/types'
 import { PagingRecord } from './paging/types'
-import { SortingRecord } from './sorting/types'
+import { SortingRecord, SortingSqlTransformer } from './sorting/types'
 
 export type DataQueryRecord<TFieldNames extends string = string> = PagingRecord & {
   sorting?: SortingRecord<TFieldNames>
@@ -45,6 +45,8 @@ export type ToSqlOptions = {
    * @default true
    */
   includeWhereWord?: boolean
+  sortingTransformer?: SortingSqlTransformer
+  filterTransformer?: (node: DataFilterNode, fieldPrefix?: string) => NodeTransformResult
 }
 
 export type DataQuery<TFieldNames extends string = string> = {

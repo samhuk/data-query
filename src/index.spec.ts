@@ -157,5 +157,35 @@ describe('index', () => {
       // Dummy assertion
       expect(instance).toBeDefined()
     })
+
+    test('transformers', () => {
+      // -- Arrange + Act
+      const instance = fn({
+        page: 1,
+        pageSize: 1,
+        sorting: [
+          { field: 'field1', dir: SortingDirection.ASC },
+          { field: 'field2', dir: SortingDirection.DESC },
+        ],
+        filter: {
+          field: 'foo',
+          op: Operator.EQUALS,
+          val: 1,
+        },
+      })
+
+      const sql = instance.toSql({
+        filterTransformer: node => ({ left: `prefix.${node.field}` }),
+        sortingTransformer: node => ({ left: `prefix.${node.field}` }),
+      })
+
+      // Dummy assertion
+      const expected: DataQuerySql = {
+        orderByLimitOffset: 'order by prefix.field1 asc, prefix.field2 desc limit 1 offset 0',
+        where: 'where prefix.foo = 1',
+        whereOrderByLimitOffset: 'where prefix.foo = 1 order by prefix.field1 asc, prefix.field2 desc limit 1 offset 0',
+      }
+      expect(sql).toEqual(expected)
+    })
   })
 })

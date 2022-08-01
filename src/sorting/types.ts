@@ -2,10 +2,23 @@ export enum SortingDirection {
   ASC = 'asc',
   DESC = 'desc',
 }
-export type SortingRecord<TFieldNames extends string = string> = { field: TFieldNames, dir: SortingDirection }[] | null
+
+export type SortingRecordItem<TFieldNames extends string = string> = { field: TFieldNames, dir: SortingDirection }
+
+export type SortingRecord<TFieldNames extends string = string> = SortingRecordItem<TFieldNames>[] | null
 
 export type SortingUrlParameters = {
   sort: string
+}
+
+export type SortingSqlTransformer = (sortingRecordItem: SortingRecordItem) => { left?: string } | null
+
+export type ToSqlOptions = {
+  /**
+   * Optional transformer to use to translate a sorting record item (field name and sorting direction)
+   * into the left-hand-side of a SQL ORDER BY sorting item, i.e. the "field1" in `"field1" ASC`.
+   */
+  transformer?: SortingSqlTransformer
 }
 
 export type Sorting<TFieldNames extends string = string> = {
@@ -23,7 +36,7 @@ export type Sorting<TFieldNames extends string = string> = {
    * @example
    * sorting.toSql() // "order by "field1" asc, "field2" desc, "field3" asc"
    */
-  toSql: () => string
+  toSql: (options?: ToSqlOptions) => string
   /**
    * Converts the current sorting value to a URL query parameter.
    *

@@ -8,14 +8,16 @@ import { Paging } from './paging/types'
 
 const toSql = (sorting: Sorting, paging: Paging, dataFilter: DataFilter, options?: ToSqlOptions): DataQuerySql => {
   const orderByLimitOffset = [
-    sorting.toSql(),
+    sorting.toSql({ transformer: options?.sortingTransformer }),
     paging.toSql(),
   ].join(' ')
-  const where = `${(options?.includeWhereWord ?? true) ? 'where ' : ''}${dataFilter.toSql()}`
+  const whereClauseSql = dataFilter.toSql({ transformer: options?.filterTransformer })
+  const prefix = (options?.includeWhereWord ?? true) ? 'where ' : ''
+  const whereStatementSql = `${prefix}${whereClauseSql}`
   return {
     orderByLimitOffset,
-    where,
-    whereOrderByLimitOffset: `${where} ${orderByLimitOffset}`,
+    where: whereStatementSql,
+    whereOrderByLimitOffset: `${whereStatementSql} ${orderByLimitOffset}`,
   }
 }
 
