@@ -12,12 +12,16 @@ const toSql = (sorting: Sorting, paging: Paging, dataFilter: DataFilter, options
     paging.toSql(),
   ].join(' ')
   const whereClauseSql = dataFilter.toSql({ transformer: options?.filterTransformer })
-  const prefix = (options?.includeWhereWord ?? true) ? 'where ' : ''
-  const whereStatementSql = `${prefix}${whereClauseSql}`
+  const whereStatementSql = whereClauseSql != null
+    ? `${(options?.includeWhereWord ?? true) ? 'where ' : ''}${whereClauseSql}`
+    : null
   return {
     orderByLimitOffset,
     where: whereStatementSql,
-    whereOrderByLimitOffset: `${whereStatementSql} ${orderByLimitOffset}`,
+    whereOrderByLimitOffset: [
+      whereStatementSql,
+      orderByLimitOffset,
+    ].filter(s => s != null && s.length > 0).join(' '),
   }
 }
 
