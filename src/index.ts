@@ -6,11 +6,22 @@ import { DataQuery, DataQueryOptions, DataQueryRecord, DataQuerySql, DataQueryUr
 import { Sorting } from './sorting/types'
 import { Paging } from './paging/types'
 
+const joinOrNullIfEmpty = (strs: string[] | null, joinString: string) => {
+  if (strs == null)
+    return null
+
+  const validStrs = strs.filter(s => s != null && s.length > 0)
+
+  return validStrs.length === 0
+    ? null
+    : validStrs.join(joinString)
+}
+
 const toSql = (sorting: Sorting, paging: Paging, dataFilter: DataFilter, options?: ToSqlOptions): DataQuerySql => {
-  const orderByLimitOffset = [
+  const orderByLimitOffset = joinOrNullIfEmpty([
     sorting.toSql({ transformer: options?.sortingTransformer }),
     paging.toSql(),
-  ].join(' ')
+  ], ' ')
   const whereClauseSql = dataFilter.toSql({ transformer: options?.filterTransformer })
   const whereStatementSql = whereClauseSql != null
     ? `${(options?.includeWhereWord ?? true) ? 'where ' : ''}${whereClauseSql}`
@@ -18,10 +29,10 @@ const toSql = (sorting: Sorting, paging: Paging, dataFilter: DataFilter, options
   return {
     orderByLimitOffset,
     where: whereStatementSql,
-    whereOrderByLimitOffset: [
+    whereOrderByLimitOffset: joinOrNullIfEmpty([
       whereStatementSql,
       orderByLimitOffset,
-    ].filter(s => s != null && s.length > 0).join(' '),
+    ], ' '),
   }
 }
 

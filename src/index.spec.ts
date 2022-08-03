@@ -179,13 +179,70 @@ describe('index', () => {
         sortingTransformer: node => ({ left: `prefix.${node.field}` }),
       })
 
-      // Dummy assertion
       const expected: DataQuerySql = {
         orderByLimitOffset: 'order by prefix.field1 asc, prefix.field2 desc limit 1 offset 0',
         where: 'where prefix.foo = 1',
         whereOrderByLimitOffset: 'where prefix.foo = 1 order by prefix.field1 asc, prefix.field2 desc limit 1 offset 0',
       }
       expect(sql).toEqual(expected)
+    })
+
+    describe('unhappy paths', () => {
+      test('no options provided', () => {
+        // -- Arrange + Act
+        const instance = fn()
+
+        const sql = instance.toSql()
+
+        const expected: DataQuerySql = {
+          orderByLimitOffset: null,
+          where: null,
+          whereOrderByLimitOffset: null,
+        }
+        expect(sql).toEqual(expected)
+      })
+
+      test('empty options object provided', () => {
+        // -- Arrange + Act
+        const instance = fn({ })
+
+        const sql = instance.toSql()
+
+        const expected: DataQuerySql = {
+          orderByLimitOffset: null,
+          where: null,
+          whereOrderByLimitOffset: null,
+        }
+        expect(sql).toEqual(expected)
+      })
+
+      test('no paging provided', () => {
+        // -- Arrange + Act
+        const instance = fn({ filter: { field: 'foo', op: Operator.EQUALS, val: 1 } })
+
+        const sql = instance.toSql()
+
+        const expected: DataQuerySql = {
+          orderByLimitOffset: null,
+          where: 'where foo = 1',
+          whereOrderByLimitOffset: 'where foo = 1',
+        }
+        expect(sql).toEqual(expected)
+      })
+
+      test('no filter provided', () => {
+        // -- Arrange + Act
+        const instance = fn({ page: 3, pageSize: 50 })
+
+        const sql = instance.toSql()
+
+        const expected: DataQuerySql = {
+          orderByLimitOffset: 'limit 50 offset 100',
+          where: null,
+          whereOrderByLimitOffset: 'limit 50 offset 100',
+        }
+        expect(sql).toEqual(expected)
+      })
     })
   })
 })

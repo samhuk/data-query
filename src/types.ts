@@ -13,11 +13,11 @@ export type DataQuerySql = {
   /**
    * The ORDER BY, LIMIT, and OFFSET SQL statement
    */
-  orderByLimitOffset: string
+  orderByLimitOffset: string | null
   /**
    * The WHERE SQL statement
    */
-  where: string
+  where: string | null
   /**
    * The WHERE, ORDER BY, LIMIT, and OFFSET SQL statement.
    *
@@ -25,7 +25,7 @@ export type DataQuerySql = {
    * the where statement and the order by, limit, or offset statements
    * (E.g. group by, having, window, etc.).
    */
-  whereOrderByLimitOffset: string
+  whereOrderByLimitOffset: string | null
 }
 
 export type DataQueryUrlParameters = {
@@ -77,7 +77,7 @@ export type DataQuery<TFieldNames extends string = string> = {
     newFilter: DataFilterNodeOrGroup<TFieldNames | TFieldNames2>,
   ) => DataQuery<TFieldNames | TFieldNames2>
   /**
-   * Converts the current value of the data query to SQL statements.
+   * Converts the current value of the data query to an SQL statement.
    */
   toSql: (options?: ToSqlOptions) => DataQuerySql
   /**

@@ -1,6 +1,6 @@
 import { Sorting, SortingDirection, SortingRecord, SortingUrlParameters, ToSqlOptions } from './types'
 
-const toSql = (record: SortingRecord, options?: ToSqlOptions): string => (
+const toSql = (record: SortingRecord, options?: ToSqlOptions): string | null => (
   (record != null && record.length > 0)
     ? `order by ${record
       .filter(fs => fs.dir != null)
@@ -10,7 +10,7 @@ const toSql = (record: SortingRecord, options?: ToSqlOptions): string => (
         return `${left} ${fs.dir}`
       })
       .join(', ')}`
-    : ''
+    : null
 )
 
 const toUrlParams = (sorting: SortingRecord): SortingUrlParameters => ({

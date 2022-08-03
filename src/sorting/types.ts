@@ -36,7 +36,7 @@ export type Sorting<TFieldNames extends string = string> = {
    * @example
    * sorting.toSql() // "order by "field1" asc, "field2" desc, "field3" asc"
    */
-  toSql: (options?: ToSqlOptions) => string
+  toSql: (options?: ToSqlOptions) => string | null
   /**
    * Converts the current sorting value to a URL query parameter.
    *

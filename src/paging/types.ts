@@ -9,10 +9,10 @@ export type PagingUrlParameters = {
 }
 
 export type Paging = {
-  page: number | null
+  page: number
   pageSize: number | null
   updatePage: (newPage: number) => void
   updatePageSize: (newPageSize: number) => void
-  toSql: () => string
+  toSql: () => string | null
   toUrlParams: () => PagingUrlParameters
 }
