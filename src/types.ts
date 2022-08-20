@@ -52,7 +52,7 @@ export type ToSqlOptions = {
 export type DataQuery<TFieldNames extends string = string> = {
   page: number | null
   pageSize: number | null
-  sorting: SortingRecord | null
+  sorting: SortingRecord<TFieldNames> | null
   filter: DataFilterNodeOrGroup<TFieldNames> | null
   /**
    * Updates the data query value.
