@@ -56,7 +56,9 @@ const createDataQueryRecordFromUrlParams = <TFieldNames extends string = string>
 ): DataQueryRecord<TFieldNames> => {
   const sortingRecord = createSortingRecordFromUrlParam<TFieldNames>(urlParams.sort)
   const pagingRecord = createPagingRecordFromUrlParams(urlParams)
-  const dataFilterNodeOrGroup = JSON.parse(decodeURI(urlParams.filter)) as DataFilterNodeOrGroup<TFieldNames>
+  const dataFilterNodeOrGroup = urlParams.filter != null
+    ? JSON.parse(decodeURI(urlParams.filter)) as DataFilterNodeOrGroup<TFieldNames>
+    : null
   return {
     page: pagingRecord.page,
     pageSize: pagingRecord.pageSize,
