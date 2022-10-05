@@ -26,11 +26,11 @@ export type DataQuerySql<TInlineValues extends boolean = boolean> = {
    * (E.g. group by, having, window, etc.).
    */
   whereOrderByLimitOffset: string | null
-} & TInlineValues extends false
+} & (TInlineValues extends false
   ? {
     values: any[]
   }
-  : { }
+  : { })
 
 export type DataQueryUrlParameters = {
   page: string
