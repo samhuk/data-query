@@ -1,5 +1,5 @@
 import { createDataFilter } from '@samhuk/data-filter'
-import { DataFilter, DataFilterNodeOrGroup } from '@samhuk/data-filter/dist/types'
+import { DataFilter, DataFilterNodeOrGroup, ToSqlResult } from '@samhuk/data-filter/dist/types'
 import { createSorting, createSortingRecordFromUrlParam } from './sorting'
 import { createPaging, createPagingRecordFromUrlParams } from './paging'
 import { DataQuery, DataQueryOptions, DataQueryRecord, DataQuerySql, DataQueryUrlParameters, ToSqlOptions } from './types'
@@ -22,10 +22,27 @@ const toSql = (sorting: Sorting, paging: Paging, dataFilter: DataFilter, options
     sorting.toSql({ transformer: options?.sortingTransformer }),
     paging.toSql(),
   ], ' ')
-  const whereClauseSql = dataFilter.toSql({ transformer: options?.filterTransformer })
-  const whereStatementSql = whereClauseSql != null
-    ? `${(options?.includeWhereWord ?? true) ? 'where ' : ''}${whereClauseSql}`
+  const useParameters = !(options?.inlineValues ?? false)
+  const whereClauseSql = dataFilter.toSql({
+    transformer: options?.filterTransformer,
+    useParameters,
+    parameterStartIndex: options?.parameterStartIndex,
+  })
+
+  let whereClauseSqlText: string
+  let values: any[]
+  if (useParameters) {
+    const _whereClauseSqlText = whereClauseSql as ToSqlResult<true>
+    whereClauseSqlText = _whereClauseSqlText.sql
+    values = _whereClauseSqlText.values
+  }
+  else {
+    whereClauseSqlText = whereClauseSql as string
+  }
+  const whereStatementSql = whereClauseSqlText != null
+    ? `${(options?.includeWhereWord ?? true) ? 'where ' : ''}${whereClauseSqlText}`
     : null
+
   return {
     orderByLimitOffset,
     where: whereStatementSql,
@@ -33,6 +50,7 @@ const toSql = (sorting: Sorting, paging: Paging, dataFilter: DataFilter, options
       whereStatementSql,
       orderByLimitOffset,
     ], ' '),
+    values,
   }
 }
 
@@ -80,7 +98,7 @@ export const createDataQuery = <TFieldNames extends string = string>(
     page: options?.page,
     pageSize: options?.pageSize,
     filter: options?.filter,
-    toSql: _options => toSql(sorting, paging, dataFilter as any, _options),
+    toSql: _options => toSql(sorting, paging, dataFilter as any, _options) as any,
     toUrlParams: () => toUrlParams(sorting, paging, dataFilter as any),
     toUrlParamsString: () => toUrlParamsString(sorting, paging, dataFilter as any),
     fromUrlParams: (urlParams: DataQueryUrlParameters) => {

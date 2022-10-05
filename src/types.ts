@@ -9,7 +9,7 @@ export type DataQueryRecord<TFieldNames extends string = string> = PagingRecord 
 
 export type DataQueryOptions<TFieldNames extends string = string> = DataQueryRecord<TFieldNames>
 
-export type DataQuerySql = {
+export type DataQuerySql<TInlineValues extends boolean = boolean> = {
   /**
    * The ORDER BY, LIMIT, and OFFSET SQL statement
    */
@@ -26,7 +26,11 @@ export type DataQuerySql = {
    * (E.g. group by, having, window, etc.).
    */
   whereOrderByLimitOffset: string | null
-}
+} & TInlineValues extends false
+  ? {
+    values: any[]
+  }
+  : { }
 
 export type DataQueryUrlParameters = {
   page: string
@@ -47,6 +51,21 @@ export type ToSqlOptions = {
   includeWhereWord?: boolean
   sortingTransformer?: SortingSqlTransformer
   filterTransformer?: (node: DataFilterNode, fieldPrefix?: string) => NodeTransformResult
+  /**
+   * Determines whether values for the query are inline or a represented as numbered
+   * parameters (i.e. a prepared statement), e.g. `$1`, `$2`.
+   *
+   * @default false
+   */
+  inlineValues?: boolean
+  /**
+   * Only used when `inlineValues` is `false`.
+   *
+   * The starting index for numbered parameters.
+   *
+   * @default 1
+   */
+  parameterStartIndex?: number
 }
 
 export type DataQuery<TFieldNames extends string = string> = {
@@ -79,7 +98,9 @@ export type DataQuery<TFieldNames extends string = string> = {
   /**
    * Converts the current value of the data query to an SQL statement.
    */
-  toSql: (options?: ToSqlOptions) => DataQuerySql
+  toSql: <TOptions extends ToSqlOptions>(options?: TOptions) => DataQuerySql<
+    TOptions extends { inlineValues: boolean } ? TOptions['inlineValues'] : false
+  >
   /**
    * Converts the current value of the data query to URL query parameters.
    */

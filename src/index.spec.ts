@@ -28,32 +28,63 @@ describe('index', () => {
       expect(instance.filter).toBe(undefined)
     })
 
-    test('toSql', () => {
-      // -- Arrange
-      const instance = fn({
-        page: 1,
-        pageSize: 1,
-        sorting: [
-          { field: 'field1', dir: SortingDirection.ASC },
-          { field: 'field2', dir: SortingDirection.DESC },
-        ],
-        filter: {
-          field: 'foo',
-          op: Operator.EQUALS,
-          val: 1,
-        },
+    describe('toSql', () => {
+      test('basic test - inlineValues = true', () => {
+        // -- Arrange
+        const instance = fn({
+          page: 1,
+          pageSize: 1,
+          sorting: [
+            { field: 'field1', dir: SortingDirection.ASC },
+            { field: 'field2', dir: SortingDirection.DESC },
+          ],
+          filter: {
+            field: 'foo',
+            op: Operator.EQUALS,
+            val: 1,
+          },
+        })
+
+        // -- Act
+        const sql = instance.toSql({ inlineValues: true })
+
+        // -- Assert
+        const expected: DataQuerySql = {
+          orderByLimitOffset: 'order by "field1" asc, "field2" desc limit 1 offset 0',
+          where: 'where foo = 1',
+          whereOrderByLimitOffset: 'where foo = 1 order by "field1" asc, "field2" desc limit 1 offset 0',
+        }
+        expect(sql).toEqual(expected)
       })
 
-      // -- Act
-      const sql = instance.toSql()
+      test('basic test - inlineValues = false', () => {
+        // -- Arrange
+        const instance = fn({
+          page: 1,
+          pageSize: 1,
+          sorting: [
+            { field: 'field1', dir: SortingDirection.ASC },
+            { field: 'field2', dir: SortingDirection.DESC },
+          ],
+          filter: {
+            field: 'foo',
+            op: Operator.EQUALS,
+            val: 1,
+          },
+        })
 
-      // -- Assert
-      const expected: DataQuerySql = {
-        orderByLimitOffset: 'order by "field1" asc, "field2" desc limit 1 offset 0',
-        where: 'where foo = 1',
-        whereOrderByLimitOffset: 'where foo = 1 order by "field1" asc, "field2" desc limit 1 offset 0',
-      }
-      expect(sql).toEqual(expected)
+        // -- Act
+        const sql = instance.toSql({ inlineValues: false })
+
+        // -- Assert
+        const expected: DataQuerySql = {
+          orderByLimitOffset: 'order by "field1" asc, "field2" desc limit 1 offset 0',
+          where: 'where foo = $1',
+          whereOrderByLimitOffset: 'where foo = $1 order by "field1" asc, "field2" desc limit 1 offset 0',
+          values: [1],
+        }
+        expect(sql).toEqual(expected)
+      })
     })
 
     test('toUrlParams', () => {
@@ -181,8 +212,9 @@ describe('index', () => {
 
       const expected: DataQuerySql = {
         orderByLimitOffset: 'order by prefix.field1 asc, prefix.field2 desc limit 1 offset 0',
-        where: 'where prefix.foo = 1',
-        whereOrderByLimitOffset: 'where prefix.foo = 1 order by prefix.field1 asc, prefix.field2 desc limit 1 offset 0',
+        where: 'where prefix.foo = $1',
+        whereOrderByLimitOffset: 'where prefix.foo = $1 order by prefix.field1 asc, prefix.field2 desc limit 1 offset 0',
+        values: [1],
       }
       expect(sql).toEqual(expected)
     })
@@ -198,6 +230,7 @@ describe('index', () => {
           orderByLimitOffset: null,
           where: null,
           whereOrderByLimitOffset: null,
+          values: [],
         }
         expect(sql).toEqual(expected)
       })
@@ -212,6 +245,7 @@ describe('index', () => {
           orderByLimitOffset: null,
           where: null,
           whereOrderByLimitOffset: null,
+          values: [],
         }
         expect(sql).toEqual(expected)
       })
@@ -224,8 +258,9 @@ describe('index', () => {
 
         const expected: DataQuerySql = {
           orderByLimitOffset: null,
-          where: 'where foo = 1',
-          whereOrderByLimitOffset: 'where foo = 1',
+          where: 'where foo = $1',
+          whereOrderByLimitOffset: 'where foo = $1',
+          values: [1],
         }
         expect(sql).toEqual(expected)
       })
@@ -240,6 +275,7 @@ describe('index', () => {
           orderByLimitOffset: 'limit 50 offset 100',
           where: null,
           whereOrderByLimitOffset: 'limit 50 offset 100',
+          values: [],
         }
         expect(sql).toEqual(expected)
       })
