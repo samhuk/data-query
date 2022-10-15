@@ -25,8 +25,8 @@ export const createSorting = <TFieldNames extends string = string>(
   let sorting: Sorting
 
   return sorting = {
-    value: options,
-    update: newValue => sorting.value = newValue,
+    value: options ?? [],
+    update: newValue => sorting.value = newValue ?? [],
     toSql: _options => toSql(sorting.value, _options),
     toUrlParams: () => toUrlParams(sorting.value),
   }

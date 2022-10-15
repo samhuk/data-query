@@ -54,10 +54,15 @@ const toSql = (sorting: Sorting, paging: Paging, dataFilter: DataFilter, options
   }
 }
 
+const dataFilterToUrlParamValue = (df: DataFilter): string => {
+  const json = df.toJson()
+  return json === 'null' ? '' : encodeURI(json)
+}
+
 const toUrlParams = (sorting: Sorting, paging: Paging, dataFilter: DataFilter): DataQueryUrlParameters => ({
   ...paging.toUrlParams(),
   ...sorting.toUrlParams(),
-  filter: encodeURI(dataFilter.toJson()),
+  filter: dataFilterToUrlParamValue(dataFilter),
 })
 
 const toUrlParamsString = (sorting: Sorting, paging: Paging, dataFilter: DataFilter): string => {

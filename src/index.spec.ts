@@ -87,33 +87,86 @@ describe('index', () => {
       })
     })
 
-    test('toUrlParams', () => {
-      // -- Arrange
-      const instance = fn({
-        page: 1,
-        pageSize: 1,
-        sorting: [
-          { field: 'field1', dir: SortingDirection.ASC },
-          { field: 'field2', dir: SortingDirection.DESC },
-        ],
-        filter: {
-          field: 'foo',
-          op: Operator.EQUALS,
-          val: 1,
-        },
+    describe('toUrlParams', () => {
+      test('basic test', () => {
+        // -- Arrange
+        const instance = fn({
+          page: 1,
+          pageSize: 1,
+          sorting: [
+            { field: 'field1', dir: SortingDirection.ASC },
+            { field: 'field2', dir: SortingDirection.DESC },
+          ],
+          filter: {
+            field: 'foo',
+            op: Operator.EQUALS,
+            val: 1,
+          },
+        })
+
+        // -- Act
+        const urlParams = instance.toUrlParams()
+
+        // -- Assert
+        const expected: DataQueryUrlParameters = {
+          page: '1',
+          pageSize: '1',
+          sort: 'field1-asc,field2-desc',
+          filter: '%7B%22field%22:%22foo%22,%22op%22:%22=%22,%22val%22:1%7D',
+        }
+        expect(urlParams).toEqual(expected)
+      })
+    })
+
+    describe('toUrlParams', () => {
+      test('basic test', () => {
+        // -- Arrange
+        const instance = fn({
+          page: 1,
+          pageSize: 1,
+          sorting: [
+            { field: 'field1', dir: SortingDirection.ASC },
+            { field: 'field2', dir: SortingDirection.DESC },
+          ],
+          filter: {
+            field: 'foo',
+            op: Operator.EQUALS,
+            val: 1,
+          },
+        })
+
+        // -- Act
+        const urlParams = instance.toUrlParams()
+
+        // -- Assert
+        const expected: DataQueryUrlParameters = {
+          page: '1',
+          pageSize: '1',
+          sort: 'field1-asc,field2-desc',
+          filter: '%7B%22field%22:%22foo%22,%22op%22:%22=%22,%22val%22:1%7D',
+        }
+        expect(urlParams).toEqual(expected)
       })
 
-      // -- Act
-      const urlParams = instance.toUrlParams()
+      test('only page and pageSize', () => {
+        // -- Arrange
+        const instance = fn({
+          page: 1,
+          pageSize: 1,
+        })
 
-      // -- Assert
-      const expected: DataQueryUrlParameters = {
-        page: '1',
-        pageSize: '1',
-        sort: 'field1-asc,field2-desc',
-        filter: '%7B%22field%22:%22foo%22,%22op%22:%22=%22,%22val%22:1%7D',
-      }
-      expect(urlParams).toEqual(expected)
+        // -- Act
+        const urlParams = instance.toUrlParams()
+
+        // -- Assert
+        const expected: DataQueryUrlParameters = {
+          page: '1',
+          pageSize: '1',
+          sort: '',
+          filter: '',
+        }
+        expect(urlParams).toEqual(expected)
+      })
     })
 
     test('toUrlParamsString', () => {
