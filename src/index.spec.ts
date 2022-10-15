@@ -192,29 +192,50 @@ describe('index', () => {
       expect(urlParamsString).toEqual('page=1&pageSize=1&sort=field1-asc,field2-desc&filter=%7B%22field%22:%22foo%22,%22op%22:%22=%22,%22val%22:1%7D')
     })
 
-    test('fromUrlParams', () => {
-      // -- Arrange
-      const urlParams: DataQueryUrlParameters = {
-        page: '1',
-        pageSize: '1',
-        sort: 'field1-asc,field2-desc',
-        filter: '%7B%22field%22:%22foo%22,%22op%22:%22=%22,%22val%22:1%7D',
-      }
+    describe('fromUrlParams', () => {
+      test('basic test', () => {
+        // -- Arrange
+        const urlParams: DataQueryUrlParameters = {
+          page: '1',
+          pageSize: '1',
+          sort: 'field1-asc,field2-desc',
+          filter: '%7B%22field%22:%22foo%22,%22op%22:%22=%22,%22val%22:1%7D',
+        }
 
-      // -- Act
-      const dataQuery = createDataQuery().fromUrlParams(urlParams)
+        // -- Act
+        const dataQuery = createDataQuery().fromUrlParams(urlParams)
 
-      // -- Assert
-      expect(dataQuery.page).toBe(1)
-      expect(dataQuery.pageSize).toBe(1)
-      expect(dataQuery.sorting).toEqual([
-        { field: 'field1', dir: SortingDirection.ASC },
-        { field: 'field2', dir: SortingDirection.DESC },
-      ])
-      expect(dataQuery.filter).toEqual({
-        field: 'foo',
-        op: Operator.EQUALS,
-        val: 1,
+        // -- Assert
+        expect(dataQuery.page).toBe(1)
+        expect(dataQuery.pageSize).toBe(1)
+        expect(dataQuery.sorting).toEqual([
+          { field: 'field1', dir: SortingDirection.ASC },
+          { field: 'field2', dir: SortingDirection.DESC },
+        ])
+        expect(dataQuery.filter).toEqual({
+          field: 'foo',
+          op: Operator.EQUALS,
+          val: 1,
+        })
+      })
+
+      test('only page and pageSize', () => {
+        // -- Arrange
+        const urlParams: DataQueryUrlParameters = {
+          page: '1',
+          pageSize: '1',
+          sort: '',
+          filter: '',
+        }
+
+        // -- Act
+        const dataQuery = createDataQuery().fromUrlParams(urlParams)
+
+        // -- Assert
+        expect(dataQuery.page).toBe(1)
+        expect(dataQuery.pageSize).toBe(1)
+        expect(dataQuery.sorting).toEqual([])
+        expect(dataQuery.filter).toEqual(null)
       })
     })
 
