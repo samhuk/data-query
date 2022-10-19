@@ -1,6 +1,6 @@
 # data-query
 
-A package for creating data queries with paging, sorting, and filtering, with URL and SQL conversion.
+A package for creating data queries with paging, sorting, and filtering, with URL and SQL serialization.
 
 ## Usage
 
